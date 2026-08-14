@@ -38,10 +38,14 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
-          # Windows 粘贴的私钥常带 CR，会导致 publickey 认证失败
           printf '%s\n' "$SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null
+          echo "deploy user=$USER host=$HOST dest=$DEST"
+          echo "key first line: $(head -n1 ~/.ssh/deploy_key)"
+          echo "key last line: $(tail -n1 ~/.ssh/deploy_key)"
+          echo "key line count: $(wc -l < ~/.ssh/deploy_key)"
+          ssh-keygen -y -f ~/.ssh/deploy_key
           ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o IdentitiesOnly=yes "$USER@$HOST" "whoami && sudo nginx -t"
           scp -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -r dist/. "$USER@$HOST:$DEST/"
           ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes "$USER@$HOST" "sudo nginx -s reload"
