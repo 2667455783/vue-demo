@@ -1,0 +1,164 @@
+@use './variables' as *;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+// NProgress
+#nprogress .bar {
+  background: $primary-color !important;
+}
+
+// Page utilities
+.page-card {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.pagination-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+// Layout
+.layout-container {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+.layout-sidebar {
+  height: 100%;
+  background-color: $sidebar-bg;
+  transition: width $transition-duration;
+  overflow: hidden;
+
+  &.collapsed {
+    width: $sidebar-collapsed-width;
+  }
+
+  &:not(.collapsed) {
+    width: $sidebar-width;
+  }
+}
+
+.sidebar-title {
+  height: $header-height;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  background-color: #182030;
+}
+
+.layout-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.layout-header {
+  height: $header-height;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: #fff;
+  border-bottom: 1px solid #e6e6e6;
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+}
+
+.layout-content {
+  flex: 1;
+  overflow: auto;
+  background-color: #f0f2f5;
+  padding: 20px;
+}
+
+// Sidebar menu overrides
+.el-menu {
+  border-right: none !important;
+}
+
+.sidebar-menu:not(.el-menu--collapse) {
+  width: $sidebar-width;
+}
+
+// Login page
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.login-card {
+  width: 400px;
+  padding: 40px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+
+  .login-title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 600;
+    color: #303133;
+    margin-bottom: 30px;
+  }
+}
+
+// 404
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: #f0f2f5;
+
+  .error-code {
+    font-size: 120px;
+    font-weight: 700;
+    color: $primary-color;
+    line-height: 1;
+  }
+
+  .error-desc {
+    font-size: 20px;
+    color: #909399;
+    margin: 20px 0 40px;
+  }
+}
