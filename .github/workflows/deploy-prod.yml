@@ -29,23 +29,40 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy to server
+      - name: Prepare SSH key
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
           HOST: ${{ secrets.SERVER_HOST }}
-          DEPLOY_USER: ${{ secrets.SERVER_USER }}
-          DEST: ${{ secrets.SERVER_DEPLOY_PATH_PROD }}
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
           printf '%s\n' "$SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          echo "deploy user=$DEPLOY_USER host=$HOST dest=$DEST"
-          echo "key first line: $(head -n1 ~/.ssh/deploy_key)"
-          echo "key last line: $(tail -n1 ~/.ssh/deploy_key)"
-          echo "key line count: $(wc -l < ~/.ssh/deploy_key)"
           ssh-keygen -y -f ~/.ssh/deploy_key
           ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts
-          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o IdentitiesOnly=yes "$DEPLOY_USER@$HOST" "whoami && sudo nginx -t"
+
+      - name: SSH login check
+        env:
+          HOST: ${{ secrets.SERVER_HOST }}
+          DEPLOY_USER: ${{ secrets.SERVER_USER }}
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o IdentitiesOnly=yes "$DEPLOY_USER@$HOST" "whoami && pwd && ls -ld /var/www/vue-admin || true"
+
+      - name: Upload dist
+        env:
+          HOST: ${{ secrets.SERVER_HOST }}
+          DEPLOY_USER: ${{ secrets.SERVER_USER }}
+          DEST: ${{ secrets.SERVER_DEPLOY_PATH_PROD }}
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes "$DEPLOY_USER@$HOST" "mkdir -p '$DEST'"
           scp -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -r dist/. "$DEPLOY_USER@$HOST:$DEST/"
-          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes "$DEPLOY_USER@$HOST" "sudo nginx -s reload"
+
+      - name: Reload nginx
+        env:
+          HOST: ${{ secrets.SERVER_HOST }}
+          DEPLOY_USER: ${{ secrets.SERVER_USER }}
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes "$DEPLOY_USER@$HOST" "sudo -n nginx -t && sudo -n nginx -s reload"
