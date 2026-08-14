@@ -10,6 +10,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check secrets
+        run: |
+          echo "SERVER_HOST set: ${{ secrets.SERVER_HOST != '' }}"
+          echo "SERVER_USER set: ${{ secrets.SERVER_USER != '' }}"
+          echo "SSH_KEY set: ${{ secrets.SSH_KEY != '' }}"
+          echo "SERVER_DEPLOY_PATH_PROD set: ${{ secrets.SERVER_DEPLOY_PATH_PROD != '' }}"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -28,10 +35,13 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          source: "dist/*"
+          port: 22
+          source: "dist/"
           target: ${{ secrets.SERVER_DEPLOY_PATH_PROD }}
           strip_components: 1
+          overwrite: true
+          timeout: 30s
+          command_timeout: 2m
 
       - name: Reload nginx
         uses: appleboy/ssh-action@v1.0.3
@@ -39,5 +49,5 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
+          port: 22
           script: sudo nginx -s reload
